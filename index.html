@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Dictionary</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <!DOCTYPE html>
+    <html lang="az">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>İngilis dili oyunu</title>
+        <link rel="stylesheet" href="style.css" />
+      </head>
+      <body>
+        <div class="game-container">
+          <h1>İngilis dili oyunu</h1>
+          <p id="time">Vaxt: 60</p>
+          <p id="score">Xal: 0</p>
+          <p id="word">Hazırsınız?</p>
+
+          <input type="text" id="answer" placeholder="Mənanı yaz..." />
+          <br />
+          <button onclick="checkAnswer()">Təsdiqlə</button>
+          <button onclick="startGame()">Oyuna Başla</button>
+
+          <div id="result"></div>
+          <div id="leaderboard"></div>
+        </div>
+        
+        <script src="./js/app.js"></script>
+      </body>
+    </html>
+  </body>
+</html>
