@@ -1,38 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="az">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>English Dictionary</title>
+    <title>İngilis dili oyunu</title>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
-    <!DOCTYPE html>
-    <html lang="az">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>İngilis dili oyunu</title>
-        <link rel="stylesheet" href="style.css" />
-      </head>
-      <body>
-        <div class="game-container">
-          <h1>İngilis dili oyunu</h1>
-          <p id="time">Vaxt: 60</p>
-          <p id="score">Xal: 0</p>
-          <p id="word">Hazırsınız?</p>
+    <div class="game-container">
+      <h1>İngilis dili oyunu</h1>
 
-          <input type="text" id="answer" placeholder="Mənanı yaz..." />
-          <br />
-          <button onclick="checkAnswer()">Təsdiqlə</button>
-          <button onclick="startGame()">Oyuna Başla</button>
+      <!-- İstifadəçi adı daxil etmək -->
+      <div id="username-container">
+        <input
+          type="text"
+          id="username"
+          placeholder="İstifadəçi adını yaz..."
+        />
+        <button onclick="setUsername()">Davam et</button>
+      </div>
 
-          <div id="result"></div>
-          <div id="leaderboard"></div>
-        </div>
-        
-        <script src="./js/app.js"></script>
-      </body>
-    </html>
+      <!-- Oyun sahəsi (başlanğıcda gizli) -->
+      <div id="game-area" style="display: none">
+        <p id="time">Vaxt: 60</p>
+        <p id="score">Xal: 0</p>
+        <p id="word">Hazırsınız?</p>
+
+        <input type="text" id="answer" placeholder="Mənanı yaz..." />
+        <br />
+        <button onclick="checkAnswer()">Təsdiqlə</button>
+        <button onclick="startGame()">Oyuna Başla</button>
+        <button onclick="restartGame()" id="restartBtn" style="display: none">
+          Yenidən Oyna
+        </button>
+
+        <div id="result"></div>
+        <div id="leaderboard"></div>
+      </div>
+    </div>
+
+    <!-- Səs effektləri -->
+    <audio id="correctSound" src="correct.mp3"></audio>
+    <audio id="wrongSound" src="wrong.mp3"></audio>
+
+    <script src="./js/app.js"></script>
   </body>
 </html>
