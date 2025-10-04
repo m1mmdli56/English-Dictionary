@@ -1,6 +1,6 @@
 body {
   font-family: Arial, sans-serif;
-  background: #e6f7ff;
+  background: linear-gradient(to right, #e6f7ff, #ccf2ff);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -20,6 +20,11 @@ body {
   text-align: center;
   width: 90%;
   max-width: 400px;
+  transition: transform 0.3s ease;
+}
+
+.game-container:hover {
+  transform: scale(1.02);
 }
 
 h1 {
@@ -29,6 +34,7 @@ h1 {
 #word {
   font-size: 2em;
   margin: 20px 0;
+  animation: fadeIn 0.5s ease;
 }
 
 input {
@@ -48,6 +54,7 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 button:hover {
@@ -62,4 +69,31 @@ button:hover {
 #leaderboard {
   margin-top: 20px;
   text-align: left;
+}
+
+#username-container {
+  margin-bottom: 20px;
+}
+
+/* Animasiya */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#result {
+  margin-top: 10px;
+  font-weight: bold;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Responsive dizayn */
+@media (max-width: 500px) {
+  #word {
+    font-size: 1.5em;
+  }
+  input, button {
+    width: 90%;
+    font-size: 1em;
+  }
 }
