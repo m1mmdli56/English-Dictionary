@@ -13,6 +13,11 @@
 //  8 oyun bitəndə liderlər lövhəsi göstəriləcək
 //  9 oyun üçün sadə və cəlbedici dizayn olacaq
 //  10 oyun mobil və desktop üçün uyğun olacaq
+//  11 oyun üçün sadə animasiyalar olacaq
+//  12 oyun üçün səs effektləri olacaq
+//  13 oyun üçün restart düyməsi olacaq
+//  14 oyun üçün istifadəçi adı daxil etmək imkanı olacaq
+//  15 oyun üçün istifadəçi adı ilə birlikdə xal qeyd olunacaq
 
 const words = {
   apple: "alma",
@@ -32,20 +37,60 @@ let timeLeft = 60;
 let currentWord = "";
 let timer;
 let leaderboard = [];
+let username = "";
+let gameActive = false;
 
+// Başlanğıcda input və təsdiqlə gizli
+document.getElementById("answer").style.display = "none";
+document.querySelector("button[onclick='checkAnswer()']").style.display =
+  "none";
+
+// İstifadəçi adı daxil etmək
+function setUsername() {
+  const input = document.getElementById("username").value.trim();
+  if (input === "") {
+    alert("İstifadəçi adı boş ola bilməz!");
+    return;
+  }
+  username = input;
+  document.getElementById("username-container").style.display = "none";
+  document.getElementById("game-area").style.display = "block";
+
+  // Başla düyməsi görünür
+  document.querySelector("button[onclick='startGame()']").style.display =
+    "inline-block";
+}
+
+// Oyun başlatmaq
 function startGame() {
+  if (gameActive) return; // oyun artıq aktivdirsə başlamağa icazə yoxdur
+
   score = 0;
   timeLeft = 60;
+  gameActive = true;
+
   document.getElementById("score").innerText = "Xal: " + score;
   document.getElementById("time").innerText = "Vaxt: " + timeLeft;
   document.getElementById("result").innerText = "";
   document.getElementById("leaderboard").innerHTML = "";
+
+  // Input və təsdiqlə görünür və aktivdir
+  document.getElementById("answer").style.display = "inline-block";
+  document.getElementById("answer").disabled = false;
+  document.getElementById("answer").focus();
+  document.querySelector("button[onclick='checkAnswer()']").style.display =
+    "inline-block";
+
+  // Başla düyməsi gizlədilir
+  document.querySelector("button[onclick='startGame()']").style.display =
+    "none";
 
   showWord();
   clearInterval(timer);
   timer = setInterval(updateTime, 1000);
 }
 
+// Sözü göstərmək
 function showWord() {
   const keys = Object.keys(words);
   currentWord = keys[Math.floor(Math.random() * keys.length)];
@@ -53,7 +98,10 @@ function showWord() {
   document.getElementById("answer").value = "";
 }
 
+// Cavabı yoxlamaq
 function checkAnswer() {
+  if (!gameActive) return;
+
   const userAnswer = document
     .getElementById("answer")
     .value.trim()
@@ -61,15 +109,25 @@ function checkAnswer() {
   if (userAnswer === words[currentWord]) {
     score += 10;
     document.getElementById("result").innerText = "✅ Doğrudur!";
+    document.getElementById("correctSound")?.play();
   } else {
     score -= 5;
     document.getElementById("result").innerText =
       "❌ Səhvdir! Doğru cavab: " + words[currentWord];
+    document.getElementById("wrongSound")?.play();
   }
   document.getElementById("score").innerText = "Xal: " + score;
   showWord();
 }
 
+// Enter düyməsi ilə cavab təsdiqləmə
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    checkAnswer();
+  }
+});
+
+// Taymer
 function updateTime() {
   timeLeft--;
   document.getElementById("time").innerText = "Vaxt: " + timeLeft;
@@ -79,19 +137,39 @@ function updateTime() {
   }
 }
 
+// Oyun bitmə funksiyası
 function endGame() {
+  gameActive = false;
   document.getElementById("word").innerText = "Oyun bitdi!";
   document.getElementById("result").innerText =
-    "Sizin nəticəniz: " + score + " xal";
+    username + ", sənin nəticən: " + score + " xal";
 
-  leaderboard.push(score);
-  leaderboard.sort((a, b) => b - a);
+  // Input və təsdiqlə gizlədilir
+  document.getElementById("answer").style.display = "none";
+  document.querySelector("button[onclick='checkAnswer()']").style.display =
+    "none";
+
+  // Başla düyməsi gizlədilir
+  document.querySelector("button[onclick='startGame()']").style.display =
+    "none";
+
+  // Yenidən düyməsi görünür
+  document.getElementById("restartBtn").style.display = "inline-block";
+
+  // Liderlər lövhəsi
+  leaderboard.push({ name: username, score: score });
+  leaderboard.sort((a, b) => b.score - a.score);
 
   let boardHTML = "<h3>Liderlər lövhəsi</h3><ol>";
-  leaderboard.slice(0, 5).forEach((x) => {
-    boardHTML += "<li>" + x + " xal</li>";
+  leaderboard.slice(0, 5).forEach((item) => {
+    boardHTML += "<li>" + item.name + " — " + item.score + " xal</li>";
   });
   boardHTML += "</ol>";
 
   document.getElementById("leaderboard").innerHTML = boardHTML;
+}
+
+// Restart düyməsi
+function restartGame() {
+  startGame();
 }
