@@ -6,6 +6,7 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+  transition: background-color 0.3s ease;
 }
 
 .game-container {
@@ -16,7 +17,7 @@ body {
   background-blend-mode: lighten;
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
   width: 90%;
   max-width: 400px;
@@ -37,12 +38,14 @@ h1 {
   animation: fadeIn 0.5s ease;
 }
 
-input {
+input,
+select {
   padding: 10px;
   font-size: 1em;
   width: 80%;
   border: 2px solid #006699;
   border-radius: 8px;
+  margin-top: 10px;
 }
 
 button {
@@ -61,7 +64,8 @@ button:hover {
   background: #004466;
 }
 
-#score, #time {
+#score,
+#time {
   margin: 10px;
   font-weight: bold;
 }
@@ -77,8 +81,14 @@ button:hover {
 
 /* Animasiya */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 #result {
@@ -87,12 +97,14 @@ button:hover {
   animation: fadeIn 0.5s ease;
 }
 
-/* Responsive dizayn */
+/* Mobil uyğun dizayn */
 @media (max-width: 500px) {
   #word {
     font-size: 1.5em;
   }
-  input, button {
+  input,
+  button,
+  select {
     width: 90%;
     font-size: 1em;
   }
