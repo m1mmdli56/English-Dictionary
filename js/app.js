@@ -23,18 +23,18 @@ const words = {
   Naughty: "dəcəl",
   Nervous: "əsəbi",
   Polite: "nəzakətli",
-  galiant: "nəzakətli",
-  İmpolite: "nəzakətsiz",
-  İntelligent: "ağıllı",
+  gallant: "nəzakətli",
+  Impolite: "nəzakətsiz",
+  Intelligent: "ağıllı",
   Rude: "kobud",
   Lazy: "tənbəl",
   idle: "tənbəl",
   Friendly: "səmimi",
   Unfriendly: "soyuq, səmimi olmayan",
-  Selfish: "axmaq , səfeh",
-  silly: "axmaq , səfeh",
-  foolish: "axmaq , səfeh",
-  stupid: "axmaq , səfeh",
+  Selfish: "eqoist, özünü düşünən",
+  silly: "axmaq, səfeh",
+  foolish: "axmaq, səfeh",
+  stupid: "axmaq, səfeh",
   Wise: "ağıllı",
   clever: "ağıllı",
   smart: "ağıllı",
@@ -42,7 +42,7 @@ const words = {
   Hard: "çalışqan",
   working: "çalışqan",
   Attentive: "diqqətli",
-  İnattentive: "diqqətsiz",
+  Inattentive: "diqqətsiz",
   Careful: "diqqətli",
   Careless: "diqqətsiz",
   Diligent: "çalışqan",
@@ -53,14 +53,13 @@ const words = {
   Silent: "sakit",
   Peaceful: "sakit, sülhsevər",
   Patient: "səbirli",
-  İmpatient: "səbirsiz",
+  Impatient: "səbirsiz",
   Honest: "düzgün, ədalətli",
   Dishonest: "vicdansız, riyakar",
   Helpful: "yardımsevər",
-  Kind: "ürəyi açıq",
-  hearted: "ürəyi açıq",
+  Kind: "ürəyi açıq, mehriban",
+  hearted: "ürəyi açıq, mehriban",
   Cheerful: "şən, gümrah",
-  Kind: "mehriban",
   Serious: "ciddi",
   Brave: "cəsur",
   fearless: "cəsur",
@@ -74,49 +73,73 @@ let timer;
 let leaderboard = [];
 let username = "";
 let gameActive = false;
+let correctCount = 0;
+let wrongCount = 0;
 
-// Başlanğıcda input və təsdiqlə gizli
+// Başlanğıcda input və düymələr gizli
 document.getElementById("answer").style.display = "none";
 document.querySelector("button[onclick='checkAnswer()']").style.display =
   "none";
+document.getElementById("passBtn").style.display = "none";
 
 // İstifadəçi adı daxil etmək
 function setUsername() {
   const input = document.getElementById("username").value.trim();
+  const difficulty = document.getElementById("difficulty").value;
+
   if (input === "") {
     alert("İstifadəçi adı boş ola bilməz!");
     return;
   }
+
   username = input;
+  setDifficulty(difficulty);
+
   document.getElementById("username-container").style.display = "none";
   document.getElementById("game-area").style.display = "block";
 
-  // Başla düyməsi görünür
   document.querySelector("button[onclick='startGame()']").style.display =
     "inline-block";
 }
 
+// Səviyyəyə görə vaxt və xal parametrləri
+let basePoints = 10;
+function setDifficulty(level) {
+  if (level === "easy") {
+    timeLeft = 60;
+    basePoints = 10;
+  } else if (level === "medium") {
+    timeLeft = 45;
+    basePoints = 15;
+  } else if (level === "hard") {
+    timeLeft = 30;
+    basePoints = 20;
+  }
+}
+
 // Oyun başlatmaq
 function startGame() {
-  if (gameActive) return; // oyun artıq aktivdirsə başlamağa icazə yoxdur
+  if (gameActive) return;
 
   score = 0;
-  timeLeft = 60;
+  correctCount = 0;
+  wrongCount = 0;
   gameActive = true;
+
+  const difficulty = document.getElementById("difficulty").value;
+  setDifficulty(difficulty);
 
   document.getElementById("score").innerText = "Xal: " + score;
   document.getElementById("time").innerText = "Vaxt: " + timeLeft;
   document.getElementById("result").innerText = "";
   document.getElementById("leaderboard").innerHTML = "";
 
-  // Input və təsdiqlə görünür və aktivdir
   document.getElementById("answer").style.display = "inline-block";
   document.getElementById("answer").disabled = false;
   document.getElementById("answer").focus();
   document.querySelector("button[onclick='checkAnswer()']").style.display =
     "inline-block";
-
-  // Başla düyməsi gizlədilir
+  document.getElementById("passBtn").style.display = "inline-block";
   document.querySelector("button[onclick='startGame()']").style.display =
     "none";
 
@@ -133,7 +156,7 @@ function showWord() {
   document.getElementById("answer").value = "";
 }
 
-// Cavabı yoxlamaq
+// ✅ Cavabı yoxlamaq
 function checkAnswer() {
   if (!gameActive) return;
 
@@ -141,23 +164,69 @@ function checkAnswer() {
     .getElementById("answer")
     .value.trim()
     .toLowerCase();
-  if (userAnswer === words[currentWord]) {
-    score += 10;
+  if (userAnswer === "") return;
+
+  const correctVariants = words[currentWord]
+    .split(",")
+    .map((s) => s.trim().toLowerCase());
+
+  const body = document.body;
+
+  if (correctVariants.includes(userAnswer)) {
+    // ✅ Doğru cavab
+    score += basePoints;
+    correctCount++;
     document.getElementById("result").innerText = "✅ Doğrudur!";
-    document.getElementById("correctSound")?.play();
+    body.style.transition = "background-color 0.5s ease";
+    body.style.backgroundColor = "#9effa1";
+    setTimeout(() => (body.style.backgroundColor = "#ffffff"), 500);
+
+    showWord();
   } else {
-    score -= 5;
-    document.getElementById("result").innerText =
-      "❌ Səhvdir! Doğru cavab: " + words[currentWord];
-    document.getElementById("wrongSound")?.play();
+    wrongCount++;
+    body.style.transition = "background-color 0.5s ease";
+    body.style.backgroundColor = "#ff9e9e";
+    setTimeout(() => (body.style.backgroundColor = "#ffffff"), 500);
+
+    if (correctCount === 0) {
+      // ❌ Əgər hələ heç düz yazmayıbsa — oyunu bitir
+      document.getElementById("result").innerText =
+        "❌ İlk cəhddə səhv cavab! Oyun dayandırıldı. Doğru cavab: " +
+        words[currentWord];
+      clearInterval(timer);
+      gameActive = false;
+
+      document.getElementById("answer").disabled = true;
+      document.querySelector("button[onclick='checkAnswer()']").style.display =
+        "none";
+      document.getElementById("passBtn").style.display = "none";
+      document.getElementById("restartBtn").style.display = "inline-block";
+      endGame();
+      return;
+    } else {
+      // ❌ Sonradan səhv yazıbsa — xal azalır, amma oyun davam edir
+      score = Math.max(0, score - 5);
+      document.getElementById("result").innerText =
+        "⚠️ Səhv cavab! -5 xal. Doğru cavab: " + words[currentWord];
+      showWord();
+    }
   }
+
   document.getElementById("score").innerText = "Xal: " + score;
+  document.getElementById("answer").value = "";
+}
+
+// 🔹 Pas düyməsi funksiyası
+function passWord() {
+  if (!gameActive) return;
+  document.getElementById("result").innerText =
+    "⏭️ Keçildi! Doğru cavab: " + words[currentWord];
   showWord();
 }
 
 // Enter düyməsi ilə cavab təsdiqləmə
 document.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
+  if (event.key === "Enter" && gameActive) {
     checkAnswer();
   }
 });
@@ -175,29 +244,26 @@ function updateTime() {
 // Oyun bitmə funksiyası
 function endGame() {
   gameActive = false;
-  document.getElementById("word").innerText = "Oyun bitdi!";
-  document.getElementById("result").innerText =
-    username + ", sənin nəticən: " + score + " xal";
+  document.getElementById("word").innerText = "🕒 Oyun bitdi!";
+  document.getElementById("result").innerHTML = `
+    <strong>${username}</strong>, sənin nəticən: <b>${score}</b> xal<br>
+    ✅ Düzgün: <b>${correctCount}</b> | ❌ Səhv: <b>${wrongCount}</b>
+  `;
 
-  // Input və təsdiqlə gizlədilir
   document.getElementById("answer").style.display = "none";
   document.querySelector("button[onclick='checkAnswer()']").style.display =
     "none";
-
-  // Başla düyməsi gizlədilir
+  document.getElementById("passBtn").style.display = "none";
   document.querySelector("button[onclick='startGame()']").style.display =
     "none";
-
-  // Yenidən düyməsi görünür
   document.getElementById("restartBtn").style.display = "inline-block";
 
-  // Liderlər lövhəsi
   leaderboard.push({ name: username, score: score });
   leaderboard.sort((a, b) => b.score - a.score);
 
   let boardHTML = "<h3>Liderlər lövhəsi</h3><ol>";
   leaderboard.slice(0, 5).forEach((item) => {
-    boardHTML += "<li>" + item.name + " — " + item.score + " xal</li>";
+    boardHTML += `<li>${item.name} — ${item.score} xal</li>`;
   });
   boardHTML += "</ol>";
 
@@ -208,3 +274,10 @@ function endGame() {
 function restartGame() {
   startGame();
 }
+
+/*  
+Oyun fon rəngi dəyişir (animasiya ilə)
+Düzgün/səhv cavabda səs + rəng effekti.
+Səviyyəyə görə vaxt və xal fərqi.
+Oyun statistikasını göstər (düzgün/səhv cavab sayı).
+*/
