@@ -19,53 +19,39 @@
 //  14 oyun üçün istifadəçi adı daxil etmək imkanı olacaq
 //  15 oyun üçün istifadəçi adı ilə birlikdə xal qeyd olunacaq
 
-const words = {
-  Naughty: "dəcəl",
-  Nervous: "əsəbi",
-  Polite: "nəzakətli",
-  gallant: "nəzakətli",
-  Impolite: "nəzakətsiz",
-  Intelligent: "ağıllı",
-  Rude: "kobud",
-  Lazy: "tənbəl",
-  idle: "tənbəl",
-  Friendly: "səmimi",
-  Unfriendly: "soyuq, səmimi olmayan",
-  Selfish: "eqoist, özünü düşünən",
-  silly: "axmaq, səfeh",
-  foolish: "axmaq, səfeh",
-  stupid: "axmaq, səfeh",
-  Wise: "ağıllı",
-  clever: "ağıllı",
-  smart: "ağıllı",
-  Fair: "düzgün, ədalətli",
-  Hard: "çalışqan",
-  working: "çalışqan",
-  Attentive: "diqqətli",
-  Inattentive: "diqqətsiz",
-  Careful: "diqqətli",
-  Careless: "diqqətsiz",
-  Diligent: "çalışqan",
-  Talented: "istedadlı",
-  Calm: "sakit",
-  Proud: "qürurlu",
-  Hospitable: "qonaqpərvər",
-  Silent: "sakit",
-  Peaceful: "sakit, sülhsevər",
-  Patient: "səbirli",
-  Impatient: "səbirsiz",
-  Honest: "düzgün, ədalətli",
-  Dishonest: "vicdansız, riyakar",
-  Helpful: "yardımsevər",
-  Kind: "ürəyi açıq, mehriban",
-  hearted: "ürəyi açıq, mehriban",
-  Cheerful: "şən, gümrah",
-  Serious: "ciddi",
-  Brave: "cəsur",
-  fearless: "cəsur",
-  Greedy: "acgöz, tamahkar",
+const wordBank = {
+  character: {
+    Naughty: "dəcəl",
+    Kind: "ürəyi açıq",
+    Friendly: "səmimi",
+    Rude: "kobud",
+    Selfish: "eqoist",
+    Brave: "cəsur",
+  },
+  animals: {
+    Cat: "pişik",
+    Dog: "it",
+    Lion: "aslan",
+    Bird: "quş",
+    Horse: "at",
+  },
+  jobs: {
+    Teacher: "müəllim",
+    Doctor: "həkim",
+    Engineer: "mühəndis",
+    Chef: "aşpaz",
+    Driver: "sürücü",
+  },
+  nature: {
+    Tree: "ağac",
+    Mountain: "dağ",
+    River: "çay",
+    Sun: "günəş",
+    Rain: "yağış",
+  },
 };
 
+let selectedWords = {}; // seçilmiş kateqoriyaya aid sözlər
 let score = 0;
 let timeLeft = 60;
 let currentWord = "";
@@ -76,14 +62,12 @@ let gameActive = false;
 let correctCount = 0;
 let wrongCount = 0;
 let basePoints = 10;
+let streak = 0;
+let level = 1;
 
-// ✅ Səslər
-const correctSound = new Audio(
-  "https://cdn.pixabay.com/audio/2022/03/15/audio_5c6b4e6bb1.mp3"
-);
-const wrongSound = new Audio(
-  "https://cdn.pixabay.com/audio/2022/03/15/audio_8b3d37c69e.mp3"
-);
+// ✅ Səslər (hazırda boş)
+const correctSound = new Audio("");
+const wrongSound = new Audio("");
 
 // Başlanğıcda input və düymələr gizli
 document.getElementById("answer").style.display = "none";
@@ -91,10 +75,17 @@ document.querySelector("button[onclick='checkAnswer()']").style.display =
   "none";
 document.getElementById("passBtn").style.display = "none";
 
-// İstifadəçi adı daxil etmək
+document
+  .getElementById("darkModeToggle")
+  .addEventListener("change", function () {
+    document.body.dataset.theme = this.checked ? "dark" : "light";
+  });
+
+// 👤 İstifadəçi adı və kateqoriya seçimi
 function setUsername() {
   const input = document.getElementById("username").value.trim();
   const difficulty = document.getElementById("difficulty").value;
+  const category = document.getElementById("category").value; // kateqoriya seçimi
 
   if (input === "") {
     alert("İstifadəçi adı boş ola bilməz!");
@@ -104,14 +95,22 @@ function setUsername() {
   username = input;
   setDifficulty(difficulty);
 
+  // seçilmiş kateqoriyaya uyğun sözləri təyin edirik
+  if (category === "all") {
+    selectedWords = Object.assign({}, ...Object.values(wordBank));
+  } else {
+    selectedWords = wordBank[category];
+  }
+
   document.getElementById("username-container").style.display = "none";
   document.getElementById("game-area").style.display = "block";
 
   document.querySelector("button[onclick='startGame()']").style.display =
     "inline-block";
+  updateStatsDisplay();
 }
 
-// 🎮 Səviyyəyə görə vaxt və xal fərqi
+// 🎮 Səviyyə çətinliyi
 function setDifficulty(level) {
   if (level === "easy") {
     timeLeft = 60;
@@ -125,13 +124,15 @@ function setDifficulty(level) {
   }
 }
 
-// 🔥 Oyun başlatmaq
+// 🚀 Oyun başlatmaq
 function startGame() {
   if (gameActive) return;
 
   score = 0;
   correctCount = 0;
   wrongCount = 0;
+  streak = 0;
+  level = 1;
   gameActive = true;
 
   const difficulty = document.getElementById("difficulty").value;
@@ -156,13 +157,18 @@ function startGame() {
   showWord();
   clearInterval(timer);
   timer = setInterval(updateTime, 1000);
+  updateStatsDisplay();
 }
 
 // 🧠 Sözü göstərmək
 function showWord() {
-  const keys = Object.keys(words);
+  const keys = Object.keys(selectedWords);
   currentWord = keys[Math.floor(Math.random() * keys.length)];
-  document.getElementById("word").innerText = currentWord;
+  const wordEl = document.getElementById("word");
+  wordEl.classList.remove("fade-in");
+  void wordEl.offsetWidth; // reflow
+  wordEl.classList.add("fade-in");
+  wordEl.innerText = currentWord;
   document.getElementById("answer").value = "";
 }
 
@@ -176,29 +182,41 @@ function checkAnswer() {
     .toLowerCase();
   if (userAnswer === "") return;
 
-  const correctVariants = words[currentWord]
+  const correctVariants = selectedWords[currentWord]
     .split(",")
     .map((s) => s.trim().toLowerCase());
-  const body = document.body;
 
   if (correctVariants.includes(userAnswer)) {
     // ✅ Doğru cavab
     score += basePoints;
     correctCount++;
+    streak++;
     correctSound.play();
-    document.getElementById("result").innerText = "✅ Doğrudur!";
     animateBackground("#9effa1");
     showWord();
+
+    if (streak % 5 === 0) {
+      score += 20;
+      timeLeft += 5;
+      document.getElementById(
+        "result"
+      ).innerText = `🎉 5 ardıcıl doğru! Bonus +20 xal və +5 saniyə!`;
+    }
+
+    if (score >= level * 100) {
+      level++;
+      document.getElementById("result").innerText += ` 🌟 Səviyyə ${level}!`;
+      timeLeft += 10;
+    }
   } else {
     wrongCount++;
     wrongSound.play();
     animateBackground("#ff9e9e");
 
     if (correctCount === 0) {
-      // ❌ Əgər hələ heç düz yazmayıbsa — oyunu bitir
       document.getElementById("result").innerText =
         "❌ İlk cəhddə səhv cavab! Oyun dayandırıldı. Doğru cavab: " +
-        words[currentWord];
+        selectedWords[currentWord];
       clearInterval(timer);
       gameActive = false;
       document.getElementById("answer").disabled = true;
@@ -206,34 +224,35 @@ function checkAnswer() {
       endGame();
       return;
     } else {
-      // ❌ Sonradan səhv yazıbsa — xal azalır
       score = Math.max(0, score - 5);
+      streak = 0;
       document.getElementById("result").innerText =
-        "⚠️ Səhv cavab! -5 xal. Doğru cavab: " + words[currentWord];
+        "⚠️ Səhv cavab! -5 xal. Doğru cavab: " + selectedWords[currentWord];
       showWord();
     }
   }
 
-  document.getElementById("score").innerText = "Xal: " + score;
-  document.getElementById("answer").value = "";
+  updateStatsDisplay();
 }
 
-// 🎨 Fon animasiyası
+// 🎨 Fon rəng effekti
 function animateBackground(color) {
   document.body.style.transition = "background-color 0.5s ease";
   document.body.style.backgroundColor = color;
   setTimeout(() => (document.body.style.backgroundColor = "#ffffff"), 600);
 }
 
-// ⏭️ Pas düyməsi funksiyası
+// ⏭️ Pass
 function passWord() {
   if (!gameActive) return;
   document.getElementById("result").innerText =
-    "⏭️ Keçildi! Doğru cavab: " + words[currentWord];
+    "⏭️ Keçildi! Doğru cavab: " + selectedWords[currentWord];
   showWord();
+  streak = 0;
+  updateStatsDisplay();
 }
 
-// 🔄 Enter ilə cavab təsdiqləmə
+// ⌨️ Enter ilə cavab
 document.addEventListener("keydown", function (event) {
   if (event.key === "Enter" && gameActive) checkAnswer();
 });
@@ -241,14 +260,14 @@ document.addEventListener("keydown", function (event) {
 // ⏰ Taymer
 function updateTime() {
   timeLeft--;
-  document.getElementById("time").innerText = "Vaxt: " + timeLeft;
   if (timeLeft <= 0) {
     clearInterval(timer);
     endGame();
   }
+  updateStatsDisplay();
 }
 
-// 🏁 Oyun bitmə funksiyası
+// 🏁 Oyun sonu
 function endGame() {
   gameActive = false;
   document.getElementById("word").innerText = "🕒 Oyun bitdi!";
@@ -272,12 +291,12 @@ function endGame() {
   document.getElementById("leaderboard").innerHTML = boardHTML;
 }
 
-// 🔁 Oyun yenidən başlatmaq
+// 🔁 Yenidən başlat
 function restartGame() {
   startGame();
 }
 
-// 🔒 Yardımçı funksiya
+// 🔒 Yardımçı
 function hideButtons() {
   document.getElementById("answer").style.display = "none";
   document.querySelector("button[onclick='checkAnswer()']").style.display =
@@ -287,9 +306,22 @@ function hideButtons() {
     "none";
 }
 
-/*  
-Oyun fon rəngi dəyişir (animasiya ilə)
-Düzgün/səhv cavabda səs + rəng effekti.
-Səviyyəyə görə vaxt və xal fərqi.
-Oyun statistikasını göstər (düzgün/səhv cavab sayı).
-*/
+// 📊 Stats
+function updateStatsDisplay() {
+  document.getElementById("score").innerText = "Xal: " + score;
+  document.getElementById("time").innerText = "Vaxt: " + timeLeft;
+
+  if (!document.getElementById("level")) {
+    const lvl = document.createElement("p");
+    lvl.id = "level";
+    document.getElementById("game-area").prepend(lvl);
+  }
+  if (!document.getElementById("streak")) {
+    const st = document.createElement("p");
+    st.id = "streak";
+    document.getElementById("game-area").prepend(st);
+  }
+
+  document.getElementById("level").innerText = "Səviyyə: " + level;
+  document.getElementById("streak").innerText = "Ardıcıl doğru: " + streak;
+}
