@@ -6,11 +6,16 @@
     <title>İngilis dili oyunu</title>
     <link rel="stylesheet" href="./css/style.css" />
   </head>
-  <body>
+  <body data-theme="light">
     <div class="game-container">
       <h1>İngilis dili oyunu</h1>
 
-      <!-- İstifadəçi adı -->
+      <!-- Dark mode toggle sağ üst -->
+      <label class="toggle">
+        <input type="checkbox" id="darkModeToggle" /> Dark Mode
+      </label>
+
+      <!-- İstifadəçi adı və kateqoriya seçimi -->
       <div id="username-container">
         <input
           type="text"
@@ -25,6 +30,15 @@
           <option value="hard">Çətin (30 saniyə)</option>
         </select>
         <br />
+        <label for="category">Kateqoriya seç:</label>
+        <select id="category">
+          <option value="all">Bütün sözlər</option>
+          <option value="animals">Heyvanlar</option>
+          <option value="character">Xarakter</option>
+          <option value="jobs">Peşələr</option>
+          <option value="nature">Təbiət</option>
+        </select>
+        <br />
         <button onclick="setUsername()">Davam et</button>
       </div>
 
@@ -32,17 +46,17 @@
       <div id="game-area" style="display: none">
         <p id="time">Vaxt: 60</p>
         <p id="score">Xal: 0</p>
-        <p id="word">Hazırsınız?</p>
+        <p id="level">Səviyyə: 1</p>
+        <p id="streak">Ardıcıl doğru: 0</p>
 
+        <p id="word" class="fade-in">Hazırsınız?</p>
         <input type="text" id="answer" placeholder="Mənanı yaz..." />
         <br />
-
-        <!-- 🔹 Əlavə olunan Pas düyməsi -->
         <button onclick="checkAnswer()">Təsdiqlə</button>
         <button id="passBtn" onclick="passWord()" style="display: none">
           Pas
         </button>
-        <button onclick="startGame()">Oyuna Başla</button>
+        <button onclick="startGame()" id="startBtn">Oyuna Başla</button>
         <button onclick="restartGame()" id="restartBtn" style="display: none">
           Yenidən Oyna
         </button>
@@ -53,16 +67,9 @@
     </div>
 
     <!-- Səs effektləri -->
-    <audio
-      id="correctSound"
-      src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_8e0f2db6ee.mp3?filename=correct-2-46134.mp3"
-    ></audio>
-    <audio
-      id="wrongSound"
-      src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_85a497cf4b.mp3?filename=error-2-126514.mp3"
-    ></audio>
+    <audio id="correctSound" src=""></audio>
+    <audio id="wrongSound" src=""></audio>
 
-    <!-- JS faylı -->
     <script src="./js/app.js"></script>
   </body>
 </html>
